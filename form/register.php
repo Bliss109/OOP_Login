@@ -59,9 +59,20 @@ if (isset($_POST['Register'])) {
 
     // Check if there are no errors before processing
     if (!array_filter($errors)) {
+        //Has the password
+        $password = md5($password1);
         // Process registration (e.g., save to database)
         // Redirect or show success message
-        echo 'Form submitted successfully';
+        $sql= "INSERT INTO users(firstname, lastname, email, password ) VALUE(:firstname, :lastname, :email, :password)";
+        $stmt = $conn -> prepare($sql);
+        $stmt -> execute([
+            'firstname' => $firstname,
+            'lastname' => $lastname,
+            'email' => $email,
+            'password'=> $password,
+           
+        ]);
+        echo 'New user inserted';
     }
 }
 ?>
