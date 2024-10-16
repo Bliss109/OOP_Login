@@ -1,4 +1,4 @@
-<?php 
+<?php
 require_once '../config/config.php';
 
 // Initialize errors array and form input variables
@@ -19,14 +19,14 @@ if (isset($_POST['Register'])) {
     } else {
         $firstname = htmlspecialchars($_POST['firstname']);
     }
-    
+
     // Validate Lastname
     if (empty($_POST['lastname'])) {
         $errors['lastname'] = 'Last Name should not be empty';
     } else {
         $lastname = htmlspecialchars($_POST['lastname']);
     }
-    
+
     // Validate Email
     if (empty($_POST['email'])) {
         $errors['email'] = 'Email should not be empty';
@@ -35,7 +35,7 @@ if (isset($_POST['Register'])) {
     } else {
         $email = htmlspecialchars($_POST['email']);
     }
-    
+
     // Validate Password
     if (empty($_POST['password1'])) {
         $errors['password1'] = 'Password should not be empty';
@@ -63,17 +63,30 @@ if (isset($_POST['Register'])) {
         $password = md5($password1);
         // Process registration (e.g., save to database)
         // Redirect or show success message
-        $sql= "INSERT INTO users(firstname, lastname, email, password ) VALUE(:firstname, :lastname, :email, :password)";
-        $stmt = $conn -> prepare($sql);
-        $stmt -> execute([
+        $sql = "INSERT INTO users(firstname, lastname, email, password ) VALUE(:firstname, :lastname, :email, :password)";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([
             'firstname' => $firstname,
             'lastname' => $lastname,
             'email' => $email,
-            'password'=> $password,
-           
+            'password' => $password,
+
         ]);
-        echo 'New user inserted';
-    }
+        $lastId = $conn -> lastInsertId();
+        //Select the newly registered user
+       // Corrected code to prepare and execute the SQL statement
+    $sql = "SELECT * FROM users WHERE id=:id";
+      $stmt = $conn->prepare($sql);
+      $stmt->execute(['id' => $lastId]);
+      $user = $stmt->fetch();
+     if ($user){
+        $_SESSION['user'] = $user;
+        $_SESSION['message'] = 'A new user has been created';
+        header ('Location: ../index.php');
+        exit();
+     }
+
+}
 }
 ?>
 
@@ -83,42 +96,42 @@ if (isset($_POST['Register'])) {
         <div class="col-md-5 mx-auto">
             <form action="<?php echo $_SERVER['PHP_SELF'] ?>" method="POST">
                 <h1>Register Here</h1>
-                
+
                 <!-- Firstname Field -->
                 <div class="form-group">
                     <label for="firstname">Firstname</label>
                     <input type="text" name="firstname" id="firstname" class="form-control" value="<?php echo htmlspecialchars($firstname); ?>">
                     <small class="text-danger"><?php echo $errors['firstname']; ?></small>
                 </div>
-                
+
                 <!-- Lastname Field -->
                 <div class="form-group">
                     <label for="lastname">Lastname</label>
                     <input type="text" name="lastname" id="lastname" class="form-control" value="<?php echo htmlspecialchars($lastname); ?>">
                     <small class="text-danger"><?php echo $errors['lastname']; ?></small>
                 </div>
-                
+
                 <!-- Email Field -->
                 <div class="form-group">
                     <label for="email">Email</label>
                     <input type="email" name="email" id="email" class="form-control" value="<?php echo htmlspecialchars($email); ?>">
                     <small class="text-danger"><?php echo $errors['email']; ?></small>
                 </div>
-                
+
                 <!-- Password Field -->
                 <div class="form-group">
                     <label for="password1">Password</label>
                     <input type="password" name="password1" id="password1" class="form-control">
                     <small class="text-danger"><?php echo $errors['password1']; ?></small>
                 </div>
-                
+
                 <!-- Confirm Password Field -->
                 <div class="form-group">
                     <label for="password2">Confirm Password</label>
                     <input type="password" name="password2" id="password2" class="form-control">
                     <small class="text-danger"><?php echo $errors['password2']; ?></small>
                 </div>
-                
+
                 <!-- Submit Button -->
                 <div class="d-grid">
                     <button type="submit" class="btn btn-info" name="Register">Register</button>
